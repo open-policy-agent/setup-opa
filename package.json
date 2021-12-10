@@ -1,0 +1,48 @@
+{
+  "name": "setup-opa",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "eslint --ext .ts,.js --ignore-path .gitignore --ignore-path .eslintignore .",
+    "prepare": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "test": "jest",
+    "all": "npm run lint && npm run prepare && npm run test",
+    "format": "prettier --write 'src/**/*.{js,ts}'"
+  },
+  "keywords": [],
+  "homepage": "https://infracost.io",
+  "author": "Infracost",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "https://raw.githubusercontent.com/infracost/setup-opa/master/LICENSE"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infracost/setup-opa.git"
+  },
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/exec": "^1.1.0",
+    "@actions/github": "^5.0.0",
+    "@actions/io": "^1.1.1",
+    "@actions/tool-cache": "^1.7.1",
+    "semver": "^7.3.5"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.3.9",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "@vercel/ncc": "^0.31.1",
+    "eslint": "^8.1.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "jest": "^27.3.1",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.4"
+  }
+}
