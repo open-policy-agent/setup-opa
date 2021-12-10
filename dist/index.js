@@ -15258,7 +15258,7 @@ function getDownloadObject(version) {
     //  opa_darwin_amd64
     const filename = `opa_${mapOS(platform)}_${mapArch(os.arch())}`;
     const binaryName = platform === 'win32' ? `${filename}.exe` : filename;
-    const url = `https://github.com/open-policy-agent/opa/${path}/${filename}`;
+    const url = `https://github.com/open-policy-agent/opa/${path}/${binaryName}`;
     return {
         url,
         binaryName,
