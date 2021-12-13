@@ -16,6 +16,18 @@ steps:
     uses: infracost/setup-opa@v1
 ```
 
+Subsequent steps can run the opa command as needed.
+
+```yml
+steps:
+  - name: Setup OPA
+    uses: infracost/setup-opa@v1
+
+  - name: Test Policy
+    run: opa test policies/*.rego -v
+```
+
+
 ## Inputs
 
 The action supports the following inputs:
