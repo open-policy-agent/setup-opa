@@ -87,7 +87,7 @@ async function getVersion(): Promise<string> {
   }
   return version;
 }
-// fake comment to test verify_dist action
+
 async function getAllVersions(): Promise<string[]> {
   const githubToken = core.getInput('github-token', { required: true });
   const octokit = github.getOctokit(githubToken);
