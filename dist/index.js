@@ -15250,15 +15250,15 @@ function mapOS(os) {
     return mappings[os] || os;
 }
 function getDownloadObject(version) {
-    let path = `releases/download/v${version}`;
-    if (version === 'latest') {
-        path = `releases/latest/download`;
+    let vsn = `v${version}`;
+    if (version === 'latest' || version === 'edge') {
+        vsn = version;
     }
     const platform = os.platform();
-    //  opa_darwin_amd64
+    // opa_darwin_amd64
     const filename = `opa_${mapOS(platform)}_${mapArch(os.arch())}`;
     const binaryName = platform === 'win32' ? `${filename}.exe` : filename;
-    const url = `https://github.com/open-policy-agent/opa/${path}/${binaryName}`;
+    const url = `https://www.openpolicyagent.org/downloads/${vsn}/${binaryName}`;
     return {
         url,
         binaryName,
@@ -15282,6 +15282,9 @@ function renameBinary(pathToCLI, binaryName) {
 function getVersion() {
     return __awaiter(this, void 0, void 0, function* () {
         const version = core.getInput('version');
+        if (version === 'latest' || version === 'edge') {
+            return version;
+        }
         if (semver.valid(version)) {
             return semver.clean(version) || version;
         }
