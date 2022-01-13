@@ -15342,7 +15342,7 @@ function setup() {
             yield renameBinary(pathToCLI, download.binaryName);
             // Expose the tool by adding it to the PATH
             core.addPath(pathToCLI);
-            core.notice(`Setup Open Policy Agent CLI version ${version}`);
+            core.info(`Setup Open Policy Agent CLI version ${version}`);
         }
         catch (e) {
             core.setFailed(e);
