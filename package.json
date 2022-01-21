@@ -11,18 +11,12 @@
     "format": "prettier --write 'src/**/*.{js,ts}'"
   },
   "keywords": [],
-  "homepage": "https://infracost.io",
+  "homepage": "https://www.openpolicyagent.org/",
   "author": "Infracost",
   "license": "Apache-2.0",
-  "licenses": [
-    {
-      "type": "Apache-2.0",
-      "url": "https://raw.githubusercontent.com/infracost/setup-opa/master/LICENSE"
-    }
-  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/infracost/setup-opa.git"
+    "url": "git+https://github.com/open-policy-agent/setup-opa.git"
   },
   "dependencies": {
     "@actions/core": "^1.6.0",
