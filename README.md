@@ -27,12 +27,66 @@ steps:
     run: opa test policies/*.rego -v
 ```
 
+A specific verison of OPA can be installed.
+
+```yml
+steps:
+  - name: Setup OPA
+    uses: open-policy-agent/setup-opa@v1
+    with:
+      version: 0.34.1
+```
+
+Or, OPA can be locked to a [SemVer range](https://www.npmjs.com/package/semver#ranges).
+
+```yml
+steps:
+  - name: Setup OPA
+    uses: open-policy-agent/setup-opa@v1
+    with:
+      version: 0.34.x
+```
+
+```yml
+steps:
+  - name: Setup OPA
+    uses: open-policy-agent/setup-opa@v1
+    with:
+      version: 0.34
+```
+
+```yml
+steps:
+  - name: Setup OPA
+    uses: open-policy-agent/setup-opa@v1
+    with:
+      version: <0.34
+```
+
+You may also use the `latest` or `edge` version.
+
+```yml
+steps:
+  - name: Setup OPA
+    uses: open-policy-agent/setup-opa@v1
+    with:
+      version: latest
+```
+
+```yml
+steps:
+  - name: Setup OPA
+    uses: open-policy-agent/setup-opa@v1
+    with:
+      version: edge
+```
+
 
 ## Inputs
 
 The action supports the following inputs:
 
-- `version`: Optional, defaults to `latest`. [SemVer ranges](https://www.npmjs.com/package/semver#ranges) are supported, so instead of a [full version](https://github.com/open-policy-agent/opa/releases) string, you can use `0.35`. This enables you to automatically get the latest backward compatible changes in the v0.35 release.
+- `version`: Optional, defaults to `latest`.  `latest`, `edge`, and [SemVer ranges](https://www.npmjs.com/package/semver#ranges) are supported, so instead of a [full version](https://github.com/open-policy-agent/opa/releases) string, you can use `0.35`. This enables you to automatically get the latest backward compatible changes in the v0.35 release.
 
 ## Outputs
 
