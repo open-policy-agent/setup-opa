@@ -3,7 +3,7 @@ name: Verify dist is up to date (npm run prepare)
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 defaults:
