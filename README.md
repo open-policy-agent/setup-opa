@@ -1,33 +1,39 @@
 # Setup OPA GitHub Action
 
-[Open Policy Agent (OPA)](https://github.com/open-policy-agent/opa) is an open source, general-purpose policy engine. This GitHub Action downloads and installs the OPA CLI in your GitHub Actions workflow. Subsequent steps in the same job can run the CLI in the same way it is run on the command line using the [GitHub Actions `run` syntax](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepsrun).
+GitHub action to configure the [Open Policy Agent CLI](https://www.openpolicyagent.org/docs/latest/cli/) in your GitHub Actions workflow.
 
-## Why
+[Open Policy Agent (OPA)](https://github.com/open-policy-agent/opa) is an open source, general-purpose policy engine. 
 
-As part of the open source [Infracost](https://github.com/infracost/infracost) project, we're investigating [cost policies](https://github.com/infracost/infracost/discussions/1177). We already have a [set of GitHub Actions](https://github.com/infracost/actions/) to run Infracost, so we made this project to enable users to easily install OPA in GitHub Actions too. The main benefit of this action is that it supports SemVer ranges for the `version` input (see below).
+## Running tests
 
-## Usage
+This GitHub Action works great to run any [tests](https://www.openpolicyagent.org/docs/latest/policy-testing/) you have included with your Rego files.
 
-The action can be used as follows.
+## Basic Usage
 
-```yml
-steps:
-  - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
-```
-
-Subsequent steps can run the opa command as needed.
+Here we see a simple template that checks out the repository code, installs the latest OPA, and then runs all of the Rego files in the `tests` directory. 
 
 ```yml
-steps:
-  - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+name: Run OPA Tests  
+on: [push]
+jobs:
+  Run-OPA-Tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
 
-  - name: Test Policy
-    run: opa test policies/*.rego -v
+    - name: Setup OPA
+      uses: open-policy-agent/setup-opa@v1
+      with:
+        version: latest
+
+    - name: Run OPA Tests 
+      run: opa test tests/*.rego -v
 ```
 
-A specific verison of OPA can be installed.
+## Choose OPA Version
+
+When OPA is installed on the GitHub runner, you can select a the specific version of OPA you wish to run.
 
 ```yml
 steps:
@@ -81,6 +87,18 @@ steps:
       version: edge
 ```
 
+You can also choose to run your tests against multiple versions of OPA.
+
+```yml
+strategy:
+  matrix:
+    version: [latest, 0.38.x, 0.37.x]
+steps:
+  - name: Setup OPA
+    uses: open-policy-agent/setup-opa@v1
+    with:
+      version: ${{ matrix.version }}
+```
 
 ## Inputs
 
@@ -91,3 +109,13 @@ The action supports the following inputs:
 ## Outputs
 
 This action does not set any direct outputs.
+
+## Credits
+
+Thanks to the folks over at [Infracost](https://github.com/infracost/infracost) who created the initial version of this repository. 
+
+## Contributions
+Contributions are welcome! See [Contributor's Guide](https://www.openpolicyagent.org/docs/latest/contributing/)
+
+## Code of Conduct
+👋 Be nice. See our [code of conduct](https://github.com/open-policy-agent/opa/blob/main/CODE_OF_CONDUCT.md)
