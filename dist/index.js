@@ -15277,14 +15277,22 @@ function mapOS(os) {
 }
 function getDownloadObject(version) {
     let vsn = `v${version}`;
+    let github = true;
     if (version === 'latest' || version === 'edge') {
         vsn = version;
+        github = false;
     }
     const platform = os.platform();
     // opa_darwin_amd64
     const filename = `opa_${mapOS(platform)}_${mapArch(os.arch())}`;
     const binaryName = platform === 'win32' ? `${filename}.exe` : filename;
-    const url = `https://www.openpolicyagent.org/downloads/${vsn}/${binaryName}`;
+    let url;
+    if (github) {
+        url = `https://github.com/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
+    }
+    else {
+        url = `https://www.openpolicyagent.org/downloads/${vsn}/${binaryName}`;
+    }
     return {
         url,
         binaryName,
