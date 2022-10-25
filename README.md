@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Setup OPA
-      uses: open-policy-agent/setup-opa@v1
+      uses: open-policy-agent/setup-opa@v2
       with:
         version: latest
 
@@ -38,7 +38,7 @@ When OPA is installed on the GitHub runner, you can select a the specific versio
 ```yml
 steps:
   - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+    uses: open-policy-agent/setup-opa@v2
     with:
       version: 0.44.0
 ```
@@ -48,7 +48,7 @@ Or, OPA can be locked to a [SemVer range](https://www.npmjs.com/package/semver#r
 ```yml
 steps:
   - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+    uses: open-policy-agent/setup-opa@v2
     with:
       version: 0.44.x
 ```
@@ -56,7 +56,7 @@ steps:
 ```yml
 steps:
   - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+    uses: open-policy-agent/setup-opa@v2
     with:
       version: 0.44
 ```
@@ -64,7 +64,7 @@ steps:
 ```yml
 steps:
   - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+    uses: open-policy-agent/setup-opa@v2
     with:
       version: <0.44
 ```
@@ -74,7 +74,7 @@ You may also use the `latest` or `edge` version.
 ```yml
 steps:
   - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+    uses: open-policy-agent/setup-opa@v2
     with:
       version: latest
 ```
@@ -82,7 +82,7 @@ steps:
 ```yml
 steps:
   - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+    uses: open-policy-agent/setup-opa@v2
     with:
       version: edge
 ```
@@ -95,7 +95,7 @@ strategy:
     version: [latest, 0.44.x, 0.43.x]
 steps:
   - name: Setup OPA
-    uses: open-policy-agent/setup-opa@v1
+    uses: open-policy-agent/setup-opa@v2
     with:
       version: ${{ matrix.version }}
 ```
