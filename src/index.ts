@@ -25,6 +25,14 @@ function mapOS(os: string): string {
   return mappings[os] || os;
 }
 
+// append static to the filename if requesting the static binary
+// opa_linux_arm64_static
+function maybeStatic(filename: string): string {
+  const staticBinary = core.getInput('static')
+
+  return staticBinary === 'true' ? `${filename}_static` : filename;
+}
+
 function getDownloadObject(version: string): {
   url: string;
   binaryName: string;
@@ -37,9 +45,10 @@ function getDownloadObject(version: string): {
   }
 
   const platform = os.platform();
+
   // opa_darwin_amd64
   const filename = `opa_${mapOS(platform)}_${mapArch(os.arch())}`;
-  const binaryName = platform === 'win32' ? `${filename}.exe` : filename;
+  const binaryName = platform === 'win32' ? `${filename}.exe` : maybeStatic(filename);
 
   let url: string;
   if (github) {
@@ -122,6 +131,7 @@ async function setup(): Promise<void> {
     // Download the specific version of the tool, e.g. as a tarball/zipball
     const download = getDownloadObject(version);
     const pathToCLI = fs.mkdtempSync(path.join(os.tmpdir(), 'tmp'));
+
     await tc.downloadTool(
       download.url,
       path.join(pathToCLI, download.binaryName)

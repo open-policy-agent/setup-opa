@@ -5,6 +5,10 @@ inputs:
     description: Version of Open Policy Agent CLI to install. Semver Ranges (https://www.npmjs.com/package/semver#ranges) are supported.
     required: false
     default: latest
+  static:
+    description: Set to true to use the static binary version. Defaults to false. Not available for Win32
+    required: false
+    default: 'false'
   github-token:
     description: 'The GitHub access token (e.g. secrets.GITHUB_TOKEN) used to get the list of OPA CLI versions. This defaults to {{ github.token }}.'
     default: '${{ github.token }}'
