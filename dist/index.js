@@ -17003,6 +17003,12 @@ function mapOS(os) {
     };
     return mappings[os] || os;
 }
+// append static to the filename if requesting the static binary
+// opa_linux_arm64_static
+function maybeStatic(filename) {
+    const staticBinary = core.getInput('static');
+    return staticBinary === 'true' ? `${filename}_static` : filename;
+}
 function getDownloadObject(version) {
     let vsn = `v${version}`;
     let github = true;
@@ -17013,7 +17019,7 @@ function getDownloadObject(version) {
     const platform = os.platform();
     // opa_darwin_amd64
     const filename = `opa_${mapOS(platform)}_${mapArch(os.arch())}`;
-    const binaryName = platform === 'win32' ? `${filename}.exe` : filename;
+    const binaryName = platform === 'win32' ? `${filename}.exe` : maybeStatic(filename);
     let url;
     if (github) {
         url = `https://github.com/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
