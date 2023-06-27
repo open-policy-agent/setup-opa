@@ -124,7 +124,7 @@ running commands such as `terraform show -json tfplan > tfplan.json`.
 
 There are two primary options for resolving this issue:
 
-- **Either** disable the `terraform_wrapper` when using
+- **EITHER** disable the `terraform_wrapper` when using
   [hashicorp/setup-terraform](https://github.com/hashicorp/setup-terraform)
 
   ```yaml
