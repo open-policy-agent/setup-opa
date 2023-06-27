@@ -112,7 +112,7 @@ This action does not set any direct outputs.
 
 ## Troubleshooting
 
-### Within GitHub Actions, using Terraform plan as `input` results in `["command"]`
+### Within GitHub Actions, using Terraform plans as `input` results in `["command"]`
 
 Sometimes, when trying to analyze a JSON-formatted Terraform plan with `opa`,
 the `input` is always bound to `["command"]` regardless of the contents of the
