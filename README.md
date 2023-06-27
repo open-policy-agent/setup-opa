@@ -120,9 +120,7 @@ plan. This issue is specific to GitHub Actions, and is related to the
 `terraform_wrapper` functionality that is enabled by default in the official
 [hashicorp/setup-terraform](https://github.com/hashicorp/setup-terraform)
 action. Specifically, the `terraform_wrapper` includes extra metadata when
-running commands such as `terraform show -json tfplan > tfplan.json`. For a more
-thorough description of why this happens, see this
-[issue](https://github.com/open-policy-agent/opa/issues/5619#issuecomment-1608245191).
+running commands such as `terraform show -json tfplan > tfplan.json`.
 
 There are two primary options for resolving this issue:
 
@@ -139,6 +137,9 @@ There are two primary options for resolving this issue:
   ```yaml
   - run: terraform show -json tfplan | grep '^{.*}$' > tfplan.json
   ```
+
+For a more thorough description of why this happens, see this
+[issue](https://github.com/open-policy-agent/opa/issues/5619#issuecomment-1608245191).
 
 ## Credits
 
