@@ -110,6 +110,36 @@ The action supports the following inputs:
 
 This action does not set any direct outputs.
 
+## Troubleshooting
+
+### Within GitHub Actions, using Terraform plan as `input` results in `["command"]`
+
+Sometimes, when trying to analyze a JSON-formatted Terraform plan with `opa`,
+the `input` is always bound to `["command"]` regardless of the contents of the
+plan. This issue is specific to GitHub Actions, and is related to the
+`terraform_wrapper` functionality that is enabled by default in the official
+[hashicorp/setup-terraform](https://github.com/hashicorp/setup-terraform)
+action. Specifically, the `terraform_wrapper` includes extra metadata when
+running commands such as `terraform show -json tfplan > tfplan.json`. For a more
+thorough description of why this happens, see this
+[issue](https://github.com/open-policy-agent/opa/issues/5619#issuecomment-1608245191).
+
+There are two primary options for resolving this issue:
+
+- Disable the `terraform_wrapper` when using [hashicorp/setup-terraform](https://github.com/hashicorp/setup-terraform)
+
+  ```yaml
+  - uses: hashicorp/setup-terraform@{{REF}}
+    with:
+      terraform_wrapper: false
+  ```
+
+- Manually "filter" the extra metadata when creating the JSON-formatted plan:
+
+  ```yaml
+  - run: terraform show -json tfplan | grep '^{.*}$' > tfplan.json
+  ```
+
 ## Credits
 
 Thanks to the folks over at [Infracost](https://github.com/infracost/infracost) who created the initial version of this repository.
