@@ -124,7 +124,8 @@ running commands such as `terraform show -json tfplan > tfplan.json`.
 
 There are two primary options for resolving this issue:
 
-- Disable the `terraform_wrapper` when using [hashicorp/setup-terraform](https://github.com/hashicorp/setup-terraform)
+- **Either** disable the `terraform_wrapper` when using
+  [hashicorp/setup-terraform](https://github.com/hashicorp/setup-terraform)
 
   ```yaml
   - uses: hashicorp/setup-terraform@{{REF}}
@@ -132,7 +133,8 @@ There are two primary options for resolving this issue:
       terraform_wrapper: false
   ```
 
-- Manually "filter" the extra metadata when creating the JSON-formatted plan:
+- **OR** manually "filter" the extra metadata when creating the JSON-formatted
+  plan:
 
   ```yaml
   - run: terraform show -json tfplan | grep '^{.*}$' > tfplan.json
