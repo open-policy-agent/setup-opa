@@ -20,7 +20,7 @@ jobs:
         version: ["<0.34", "0.34.1", "latest", "edge"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup opa
         uses: ./
