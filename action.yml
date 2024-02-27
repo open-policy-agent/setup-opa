@@ -13,6 +13,10 @@ inputs:
     description: 'The GitHub access token (e.g. secrets.GITHUB_TOKEN) used to get the list of OPA CLI versions. This defaults to {{ github.token }}.'
     default: '${{ github.token }}'
     required: false
+  mirror:
+    description: Set to the URL of the mirror you should download from. Defaults to https://github.com. Not available for latest or edge versions.
+    default: https://github.com
+    required: false
 runs:
   using: node20
   main: dist/index.js

@@ -17009,10 +17009,13 @@ function maybeStatic(filename) {
     const staticBinary = core.getInput('static');
     return staticBinary === 'true' ? `${filename}_static` : filename;
 }
-function getDownloadObject(version) {
+function getDownloadObject(version, mirror) {
     let vsn = `v${version}`;
     let github = true;
     if (version === 'latest' || version === 'edge') {
+        if (mirror !== 'https://github.com') {
+            core.warning("Latest or edge versions not supported when mirror is set");
+        }
         vsn = version;
         github = false;
     }
@@ -17022,7 +17025,7 @@ function getDownloadObject(version) {
     const binaryName = platform === 'win32' ? `${filename}.exe` : maybeStatic(filename);
     let url;
     if (github) {
-        url = `https://github.com/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
+        url = `${mirror}/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
     }
     else {
         url = `https://www.openpolicyagent.org/downloads/${vsn}/${binaryName}`;
@@ -17100,8 +17103,9 @@ function setup() {
         try {
             // Get version of tool to be installed
             const version = yield getVersion();
+            const mirror = core.getInput('mirror');
             // Download the specific version of the tool, e.g. as a tarball/zipball
-            const download = getDownloadObject(version);
+            const download = getDownloadObject(version, mirror);
             const pathToCLI = fs.mkdtempSync(path.join(os.tmpdir(), 'tmp'));
             yield tc.downloadTool(download.url, path.join(pathToCLI, download.binaryName));
             // Make the downloaded file executable
