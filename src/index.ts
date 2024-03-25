@@ -33,13 +33,16 @@ function maybeStatic(filename: string): string {
   return staticBinary === 'true' ? `${filename}_static` : filename;
 }
 
-function getDownloadObject(version: string): {
+function getDownloadObject(version: string, mirror: string): {
   url: string;
   binaryName: string;
 } {
   let vsn = `v${version}`;
   let github = true;
   if (version === 'latest' || version === 'edge') {
+    if (mirror !== 'https://github.com') {
+      core.warning("Latest or edge versions not supported when mirror is set")
+    }
     vsn = version;
     github = false;
   }
@@ -52,7 +55,7 @@ function getDownloadObject(version: string): {
 
   let url: string;
   if (github) {
-    url = `https://github.com/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
+    url = `${mirror}/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
   } else {
     url = `https://www.openpolicyagent.org/downloads/${vsn}/${binaryName}`;
   }
@@ -128,8 +131,9 @@ async function setup(): Promise<void> {
   try {
     // Get version of tool to be installed
     const version = await getVersion();
+    const mirror = core.getInput('mirror')
     // Download the specific version of the tool, e.g. as a tarball/zipball
-    const download = getDownloadObject(version);
+    const download = getDownloadObject(version, mirror);
     const pathToCLI = fs.mkdtempSync(path.join(os.tmpdir(), 'tmp'));
 
     await tc.downloadTool(
