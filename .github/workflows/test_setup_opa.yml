@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        version: ["<0.34", "0.34.1", "latest", "edge"]
+        version: ["<0.38", "0.37.1", "latest", "edge"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,10 +29,10 @@ jobs:
 
       - name: Get expected version
         run: |
-          if [ "${{ matrix.version }}" = "<0.34" ]; then
-            export EXPECTED_VERSION=v0.33.1
-          elif [ "${{ matrix.version }}" = "0.34.1" ]; then
-            export EXPECTED_VERSION=v0.34.1
+          if [ "${{ matrix.version }}" = "<0.38" ]; then
+            export EXPECTED_VERSION=v0.37.2
+          elif [ "${{ matrix.version }}" = "0.37.1" ]; then
+            export EXPECTED_VERSION=v0.37.1
           else
             # get the latest version info from the github api
             export EXPECTED_VERSION=$(curl --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/open-policy-agent/opa/releases/latest | jq -r .name )
