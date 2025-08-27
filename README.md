@@ -105,6 +105,7 @@ steps:
 The action supports the following inputs:
 
 - `version`: Optional, defaults to `latest`.  `latest`, `edge`, and [SemVer ranges](https://www.npmjs.com/package/semver#ranges) are supported, so instead of a [full version](https://github.com/open-policy-agent/opa/releases) string, you can use `0.44`. This enables you to automatically get the latest backward compatible changes in the v0.44 release.
+- `static`: Optional, this lets you select the static binary when multiple binaries are applicable to your platform/arch combination. Defaults depend on your runner, e.g. if you're running on an ARM64 runner, it'll default to true; false otherwise.
 
 ## Outputs
 

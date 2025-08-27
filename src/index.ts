@@ -10,27 +10,20 @@ import * as fs from 'fs';
 // arch in [arm, x32, x64...] (https://nodejs.org/api/os.html#os_os_arch)
 // return value in [amd64, 386, arm]
 function mapArch(arch: string): string {
-  const mappings: { [s: string]: string } = {
-    x64: 'amd64',
-  };
-  return mappings[arch] || arch;
+  return arch === 'x64' ? 'amd64' : arch;
 }
 
 // os in [darwin, linux, win32...] (https://nodejs.org/api/os.html#os_os_platform)
 // return value in [darwin, linux, windows]
 function mapOS(os: string): string {
-  const mappings: { [s: string]: string } = {
-    win32: 'windows',
-  };
-  return mappings[os] || os;
+  return os === 'win32' ? 'windows' : os;
 }
 
 // append static to the filename if requesting the static binary
 // opa_linux_arm64_static
-function maybeStatic(filename: string): string {
-  const staticBinary = core.getInput('static')
-
-  return staticBinary === 'true' ? `${filename}_static` : filename;
+function maybeStatic(arch: string, filename: string): string {
+  const staticBinary = core.getInput('static') === 'true' || arch === 'arm64'; // For arm64, we only have static binaries
+  return staticBinary ? `${filename}_static` : filename;
 }
 
 function getDownloadObject(version: string, mirror: string): {
@@ -48,10 +41,11 @@ function getDownloadObject(version: string, mirror: string): {
   }
 
   const platform = os.platform();
+  const arch = mapArch(os.arch());
 
   // opa_darwin_amd64
-  const filename = `opa_${mapOS(platform)}_${mapArch(os.arch())}`;
-  const binaryName = platform === 'win32' ? `${filename}.exe` : maybeStatic(filename);
+  const filename = `opa_${mapOS(platform)}_${arch}`;
+  const binaryName = platform === 'win32' ? `${filename}.exe` : maybeStatic(arch, filename);
 
   let url: string;
   if (github) {
