@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
+    "target": "es2020",
+    "module": "es2020",
+    "moduleResolution": "bundler",
     "outDir": "./lib",
     "rootDir": "./src",
     "strict": true,
     "noImplicitAny": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "**/*.test.ts"]
 }
