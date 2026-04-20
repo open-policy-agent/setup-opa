@@ -125,7 +125,16 @@ async function setup(): Promise<void> {
   try {
     // Get version of tool to be installed
     const version = await getVersion();
-    const mirror = core.getInput('mirror')
+
+    // Check if the tool is already cached
+    const cachedPath = tc.find('opa', version);
+    if (cachedPath) {
+      core.info(`Found cached OPA CLI version ${version}`);
+      core.addPath(cachedPath);
+      return;
+    }
+
+    const mirror = core.getInput('mirror');
     // Download the specific version of the tool, e.g. as a tarball/zipball
     const download = getDownloadObject(version, mirror);
     const pathToCLI = fs.mkdtempSync(path.join(os.tmpdir(), 'tmp'));
@@ -141,8 +150,11 @@ async function setup(): Promise<void> {
     // Rename the platform/architecture specific binary to 'opa' or 'opa.exe'
     await renameBinary(pathToCLI, download.binaryName);
 
+    // Cache the tool for future runs
+    const toolCachePath = await tc.cacheDir(pathToCLI, 'opa', version);
+
     // Expose the tool by adding it to the PATH
-    core.addPath(pathToCLI);
+    core.addPath(toolCachePath);
 
     core.info(`Setup Open Policy Agent CLI version ${version}`);
   } catch (e) {

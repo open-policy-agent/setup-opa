@@ -22550,6 +22550,15 @@ var __awaiter3 = function(thisArg, _arguments, P, generator) {
 };
 var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs2.promises;
 var IS_WINDOWS = process.platform === "win32";
+function readlink(fsPath) {
+  return __awaiter3(this, void 0, void 0, function* () {
+    const result = yield fs2.promises.readlink(fsPath);
+    if (IS_WINDOWS && !result.endsWith("\\")) {
+      return `${result}\\`;
+    }
+    return result;
+  });
+}
 var READONLY = fs2.constants.O_RDONLY;
 function exists(fsPath) {
   return __awaiter3(this, void 0, void 0, function* () {
@@ -22599,6 +22608,32 @@ var __awaiter4 = function(thisArg, _arguments, P, generator) {
     step((generator = generator.apply(thisArg, _arguments || [])).next());
   });
 };
+function cp(source_1, dest_1) {
+  return __awaiter4(this, arguments, void 0, function* (source, dest, options = {}) {
+    const { force, recursive, copySourceDirectory } = readCopyOptions(options);
+    const destStat = (yield exists(dest)) ? yield stat(dest) : null;
+    if (destStat && destStat.isFile() && !force) {
+      return;
+    }
+    const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path.join(dest, path.basename(source)) : dest;
+    if (!(yield exists(source))) {
+      throw new Error(`no such file or directory: ${source}`);
+    }
+    const sourceStat = yield stat(source);
+    if (sourceStat.isDirectory()) {
+      if (!recursive) {
+        throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
+      } else {
+        yield cpDirRecursive(source, newDest, 0, force);
+      }
+    } else {
+      if (path.relative(source, newDest) === "") {
+        throw new Error(`'${newDest}' and '${source}' are the same file`);
+      }
+      yield copyFile2(source, newDest, force);
+    }
+  });
+}
 function mv(source_1, dest_1) {
   return __awaiter4(this, arguments, void 0, function* (source, dest, options = {}) {
     if (yield exists(dest)) {
@@ -22642,6 +22677,51 @@ function mkdirP(fsPath) {
   return __awaiter4(this, void 0, void 0, function* () {
     (0, import_assert.ok)(fsPath, "a path argument must be provided");
     yield mkdir(fsPath, { recursive: true });
+  });
+}
+function readCopyOptions(options) {
+  const force = options.force == null ? true : options.force;
+  const recursive = Boolean(options.recursive);
+  const copySourceDirectory = options.copySourceDirectory == null ? true : Boolean(options.copySourceDirectory);
+  return { force, recursive, copySourceDirectory };
+}
+function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
+  return __awaiter4(this, void 0, void 0, function* () {
+    if (currentDepth >= 255)
+      return;
+    currentDepth++;
+    yield mkdirP(destDir);
+    const files = yield readdir(sourceDir);
+    for (const fileName of files) {
+      const srcFile = `${sourceDir}/${fileName}`;
+      const destFile = `${destDir}/${fileName}`;
+      const srcFileStat = yield lstat(srcFile);
+      if (srcFileStat.isDirectory()) {
+        yield cpDirRecursive(srcFile, destFile, currentDepth, force);
+      } else {
+        yield copyFile2(srcFile, destFile, force);
+      }
+    }
+    yield chmod(destDir, (yield stat(sourceDir)).mode);
+  });
+}
+function copyFile2(srcFile, destFile, force) {
+  return __awaiter4(this, void 0, void 0, function* () {
+    if ((yield lstat(srcFile)).isSymbolicLink()) {
+      try {
+        yield lstat(destFile);
+        yield unlink(destFile);
+      } catch (e) {
+        if (e.code === "EPERM") {
+          yield chmod(destFile, "0666");
+          yield unlink(destFile);
+        }
+      }
+      const symlinkFull = yield readlink(srcFile);
+      yield symlink(symlinkFull, destFile, IS_WINDOWS ? "junction" : null);
+    } else if (!(yield exists(destFile)) || force) {
+      yield copyFile(srcFile, destFile);
+    }
   });
 }
 
@@ -22702,6 +22782,7 @@ var fs3 = __toESM(require("fs"), 1);
 var semver = __toESM(require_semver2(), 1);
 
 // node_modules/@actions/tool-cache/lib/tool-cache.js
+var os5 = __toESM(require("os"), 1);
 var path3 = __toESM(require("path"), 1);
 var semver2 = __toESM(require_semver2(), 1);
 var stream = __toESM(require("stream"), 1);
@@ -22883,6 +22964,121 @@ function downloadToolAttempt(url, dest, auth2, headers) {
     }
   });
 }
+function cacheDir(sourceDir, tool, version, arch4) {
+  return __awaiter6(this, void 0, void 0, function* () {
+    version = semver2.clean(version) || version;
+    arch4 = arch4 || os5.arch();
+    debug(`Caching tool ${tool} ${version} ${arch4}`);
+    debug(`source dir: ${sourceDir}`);
+    if (!fs3.statSync(sourceDir).isDirectory()) {
+      throw new Error("sourceDir is not a directory");
+    }
+    const destPath = yield _createToolPath(tool, version, arch4);
+    for (const itemName of fs3.readdirSync(sourceDir)) {
+      const s = path3.join(sourceDir, itemName);
+      yield cp(s, destPath, { recursive: true });
+    }
+    _completeToolPath(tool, version, arch4);
+    return destPath;
+  });
+}
+function find(toolName, versionSpec, arch4) {
+  if (!toolName) {
+    throw new Error("toolName parameter is required");
+  }
+  if (!versionSpec) {
+    throw new Error("versionSpec parameter is required");
+  }
+  arch4 = arch4 || os5.arch();
+  if (!isExplicitVersion(versionSpec)) {
+    const localVersions = findAllVersions(toolName, arch4);
+    const match = evaluateVersions(localVersions, versionSpec);
+    versionSpec = match;
+  }
+  let toolPath = "";
+  if (versionSpec) {
+    versionSpec = semver2.clean(versionSpec) || "";
+    const cachePath = path3.join(_getCacheDirectory(), toolName, versionSpec, arch4);
+    debug(`checking cache: ${cachePath}`);
+    if (fs3.existsSync(cachePath) && fs3.existsSync(`${cachePath}.complete`)) {
+      debug(`Found tool in cache ${toolName} ${versionSpec} ${arch4}`);
+      toolPath = cachePath;
+    } else {
+      debug("not found");
+    }
+  }
+  return toolPath;
+}
+function findAllVersions(toolName, arch4) {
+  const versions = [];
+  arch4 = arch4 || os5.arch();
+  const toolPath = path3.join(_getCacheDirectory(), toolName);
+  if (fs3.existsSync(toolPath)) {
+    const children = fs3.readdirSync(toolPath);
+    for (const child of children) {
+      if (isExplicitVersion(child)) {
+        const fullPath = path3.join(toolPath, child, arch4 || "");
+        if (fs3.existsSync(fullPath) && fs3.existsSync(`${fullPath}.complete`)) {
+          versions.push(child);
+        }
+      }
+    }
+  }
+  return versions;
+}
+function _createToolPath(tool, version, arch4) {
+  return __awaiter6(this, void 0, void 0, function* () {
+    const folderPath = path3.join(_getCacheDirectory(), tool, semver2.clean(version) || version, arch4 || "");
+    debug(`destination ${folderPath}`);
+    const markerPath = `${folderPath}.complete`;
+    yield rmRF(folderPath);
+    yield rmRF(markerPath);
+    yield mkdirP(folderPath);
+    return folderPath;
+  });
+}
+function _completeToolPath(tool, version, arch4) {
+  const folderPath = path3.join(_getCacheDirectory(), tool, semver2.clean(version) || version, arch4 || "");
+  const markerPath = `${folderPath}.complete`;
+  fs3.writeFileSync(markerPath, "");
+  debug("finished caching tool");
+}
+function isExplicitVersion(versionSpec) {
+  const c = semver2.clean(versionSpec) || "";
+  debug(`isExplicit: ${c}`);
+  const valid3 = semver2.valid(c) != null;
+  debug(`explicit? ${valid3}`);
+  return valid3;
+}
+function evaluateVersions(versions, versionSpec) {
+  let version = "";
+  debug(`evaluating ${versions.length} versions`);
+  versions = versions.sort((a, b) => {
+    if (semver2.gt(a, b)) {
+      return 1;
+    }
+    return -1;
+  });
+  for (let i = versions.length - 1; i >= 0; i--) {
+    const potential = versions[i];
+    const satisfied = semver2.satisfies(potential, versionSpec);
+    if (satisfied) {
+      version = potential;
+      break;
+    }
+  }
+  if (version) {
+    debug(`matched: ${version}`);
+  } else {
+    debug("match not found");
+  }
+  return version;
+}
+function _getCacheDirectory() {
+  const cacheDirectory = process.env["RUNNER_TOOL_CACHE"] || "";
+  (0, import_assert2.ok)(cacheDirectory, "Expected RUNNER_TOOL_CACHE to be defined");
+  return cacheDirectory;
+}
 function _getTempDirectory() {
   const tempDirectory = process.env["RUNNER_TEMP"] || "";
   (0, import_assert2.ok)(tempDirectory, "Expected RUNNER_TEMP to be defined");
@@ -22894,7 +23090,7 @@ function _getGlobal(key, defaultValue) {
 }
 
 // src/index.ts
-var os5 = __toESM(require("os"));
+var os6 = __toESM(require("os"));
 var semver3 = __toESM(require_semver2());
 
 // node_modules/@actions/github/lib/context.js
@@ -26644,14 +26840,14 @@ function getOctokit(token, options, ...additionalPlugins) {
 
 // src/index.ts
 var fs4 = __toESM(require("fs"));
-function mapArch(arch3) {
-  return arch3 === "x64" ? "amd64" : arch3;
+function mapArch(arch4) {
+  return arch4 === "x64" ? "amd64" : arch4;
 }
-function mapOS(os6) {
-  return os6 === "win32" ? "windows" : os6;
+function mapOS(os7) {
+  return os7 === "win32" ? "windows" : os7;
 }
-function maybeStatic(arch3, filename) {
-  const staticBinary = getInput("static") === "true" || arch3 === "arm64";
+function maybeStatic(arch4, filename) {
+  const staticBinary = getInput("static") === "true" || arch4 === "arm64";
   return staticBinary ? `${filename}_static` : filename;
 }
 function getDownloadObject(version, mirror) {
@@ -26664,10 +26860,10 @@ function getDownloadObject(version, mirror) {
     vsn = version;
     github = false;
   }
-  const platform3 = os5.platform();
-  const arch3 = mapArch(os5.arch());
-  const filename = `opa_${mapOS(platform3)}_${arch3}`;
-  const binaryName = platform3 === "win32" ? `${filename}.exe` : maybeStatic(arch3, filename);
+  const platform3 = os6.platform();
+  const arch4 = mapArch(os6.arch());
+  const filename = `opa_${mapOS(platform3)}_${arch4}`;
+  const binaryName = platform3 === "win32" ? `${filename}.exe` : maybeStatic(arch4, filename);
   let url;
   if (github) {
     url = `${mirror}/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
@@ -26731,16 +26927,23 @@ async function getAllVersions() {
 async function setup() {
   try {
     const version = await getVersion();
+    const cachedPath = find("opa", version);
+    if (cachedPath) {
+      info(`Found cached OPA CLI version ${version}`);
+      addPath(cachedPath);
+      return;
+    }
     const mirror = getInput("mirror");
     const download = getDownloadObject(version, mirror);
-    const pathToCLI = fs4.mkdtempSync(path4.join(os5.tmpdir(), "tmp"));
+    const pathToCLI = fs4.mkdtempSync(path4.join(os6.tmpdir(), "tmp"));
     await downloadTool(
       download.url,
       path4.join(pathToCLI, download.binaryName)
     );
     fs4.chmodSync(path4.join(pathToCLI, download.binaryName), "755");
     await renameBinary(pathToCLI, download.binaryName);
-    addPath(pathToCLI);
+    const toolCachePath = await cacheDir(pathToCLI, "opa", version);
+    addPath(toolCachePath);
     info(`Setup Open Policy Agent CLI version ${version}`);
   } catch (e) {
     setFailed(e);
