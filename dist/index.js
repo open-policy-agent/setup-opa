@@ -19349,8 +19349,8 @@ var require_gte = __commonJS({
   "node_modules/semver/functions/gte.js"(exports2, module2) {
     "use strict";
     var compare = require_compare();
-    var gte = (a, b, loose) => compare(a, b, loose) >= 0;
-    module2.exports = gte;
+    var gte2 = (a, b, loose) => compare(a, b, loose) >= 0;
+    module2.exports = gte2;
   }
 });
 
@@ -19371,7 +19371,7 @@ var require_cmp = __commonJS({
     var eq = require_eq();
     var neq = require_neq();
     var gt2 = require_gt();
-    var gte = require_gte();
+    var gte2 = require_gte();
     var lt = require_lt();
     var lte = require_lte();
     var cmp = (a, op, b, loose) => {
@@ -19401,7 +19401,7 @@ var require_cmp = __commonJS({
         case ">":
           return gt2(a, b, loose);
         case ">=":
-          return gte(a, b, loose);
+          return gte2(a, b, loose);
         case "<":
           return lt(a, b, loose);
         case "<=":
@@ -20160,7 +20160,7 @@ var require_outside = __commonJS({
     var gt2 = require_gt();
     var lt = require_lt();
     var lte = require_lte();
-    var gte = require_gte();
+    var gte2 = require_gte();
     var outside = (version, range, hilo, options) => {
       version = new SemVer(version, options);
       range = new Range(range, options);
@@ -20175,7 +20175,7 @@ var require_outside = __commonJS({
           break;
         case "<":
           gtfn = lt;
-          ltefn = gte;
+          ltefn = gte2;
           ltfn = gt2;
           comp = "<";
           ecomp = "<=";
@@ -20490,7 +20490,7 @@ var require_semver2 = __commonJS({
     var lt = require_lt();
     var eq = require_eq();
     var neq = require_neq();
-    var gte = require_gte();
+    var gte2 = require_gte();
     var lte = require_lte();
     var cmp = require_cmp();
     var coerce = require_coerce();
@@ -20528,7 +20528,7 @@ var require_semver2 = __commonJS({
       lt,
       eq,
       neq,
-      gte,
+      gte: gte2,
       lte,
       cmp,
       coerce,
@@ -26650,7 +26650,15 @@ function mapArch(arch3) {
 function mapOS(os6) {
   return os6 === "win32" ? "windows" : os6;
 }
-function maybeStatic(arch3, filename) {
+var NO_STATIC_VARIANT_FROM = "1.19.0";
+function maybeStatic(version, platform3, arch3, filename) {
+  if (version === "edge" && platform3 === "darwin" && arch3 === "arm64") {
+    return `${filename}_static`;
+  }
+  const clean3 = semver3.valid(version);
+  if (!clean3 || semver3.gte(clean3, NO_STATIC_VARIANT_FROM)) {
+    return filename;
+  }
   const staticBinary = getInput("static") === "true" || arch3 === "arm64";
   return staticBinary ? `${filename}_static` : filename;
 }
@@ -26667,7 +26675,7 @@ function getDownloadObject(version, mirror) {
   const platform3 = os5.platform();
   const arch3 = mapArch(os5.arch());
   const filename = `opa_${mapOS(platform3)}_${arch3}`;
-  const binaryName = platform3 === "win32" ? `${filename}.exe` : maybeStatic(arch3, filename);
+  const binaryName = platform3 === "win32" ? `${filename}.exe` : maybeStatic(version, platform3, arch3, filename);
   let url;
   if (github) {
     url = `${mirror}/open-policy-agent/opa/releases/download/${vsn}/${binaryName}`;
