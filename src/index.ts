@@ -19,9 +19,17 @@ function mapOS(os: string): string {
   return os === 'win32' ? 'windows' : os;
 }
 
+// from this version on, the regular binaries are static too, and the
+// _static variants are deprecated
+const NO_STATIC_VARIANT_FROM = '1.19.0';
+
 // append static to the filename if requesting the static binary
 // opa_linux_arm64_static
-function maybeStatic(arch: string, filename: string): string {
+function maybeStatic(version: string, arch: string, filename: string): string {
+  const clean = semver.valid(version);
+  if (!clean || semver.gte(clean, NO_STATIC_VARIANT_FROM)) {
+    return filename;
+  }
   const staticBinary = core.getInput('static') === 'true' || arch === 'arm64'; // For arm64, we only have static binaries
   return staticBinary ? `${filename}_static` : filename;
 }
@@ -45,7 +53,7 @@ function getDownloadObject(version: string, mirror: string): {
 
   // opa_darwin_amd64
   const filename = `opa_${mapOS(platform)}_${arch}`;
-  const binaryName = platform === 'win32' ? `${filename}.exe` : maybeStatic(arch, filename);
+  const binaryName = platform === 'win32' ? `${filename}.exe` : maybeStatic(version, arch, filename);
 
   let url: string;
   if (github) {
