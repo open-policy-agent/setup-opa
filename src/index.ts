@@ -41,7 +41,12 @@ function getDownloadObject(version: string, mirror: string): {
   }
 
   const platform = os.platform();
-  const arch = mapArch(os.arch());
+  let arch = mapArch(os.arch());
+  if (platform === 'win32' && arch === 'arm64') {
+    // There are no Windows arm64 binaries; Windows on Arm runs the amd64 one
+    // through emulation.
+    arch = 'amd64';
+  }
 
   // opa_darwin_amd64
   const filename = `opa_${mapOS(platform)}_${arch}`;
