@@ -1,14 +1,11 @@
 {
   "name": "setup-opa",
   "version": "0.0.1",
+  "private": true,
   "description": "",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "lint": "eslint --ext .ts,.js --ignore-path .gitignore --ignore-path .eslintignore .",
-    "prepare": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap",
-    "test": "jest",
-    "all": "npm run lint && npm run prepare && npm run test",
-    "format": "prettier --write 'src/**/*.{js,ts}'"
+    "test": "node --test"
   },
   "keywords": [],
   "homepage": "https://www.openpolicyagent.org/",
@@ -17,26 +14,5 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/open-policy-agent/setup-opa.git"
-  },
-  "dependencies": {
-    "@actions/core": "^3.0.1",
-    "@actions/exec": "^3.0.0",
-    "@actions/github": "^9.1.1",
-    "@actions/io": "^3.0.2",
-    "@actions/tool-cache": "^4.0.0",
-    "semver": "^7.8.5"
-  },
-  "devDependencies": {
-    "@types/semver": "^7.8.0",
-    "@typescript-eslint/eslint-plugin": "^8.72.0",
-    "@typescript-eslint/parser": "^8.58.2",
-    "esbuild": "^0.28.2",
-    "eslint": "^10.13.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
-    "jest": "^30.5.2",
-    "prettier": "^3.9.10",
-    "typescript": "^7.0.2"
   }
 }
